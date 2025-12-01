@@ -13,7 +13,8 @@ server:
 
 test-unit:
 	docker run --name unit-tests --env PYTHONPATH=/opt/calc -w /opt/calc calculator-app:latest pytest --cov --cov-report=xml:results/coverage.xml --cov-report=html:results/coverage --junit-xml=results/unit_result.xml -m unit || true
-	docker cp unit-tests:/opt/calc/results ./
+	docker cp unit-tests:/opt/calc/results . 2>&1 | grep -v "Error" || true
+	@ls -la results/ 2>/dev/null || echo "Directorio results vacío"
 	docker rm unit-tests || true
 	@echo "✓ Pruebas unitarias completadas - Resultados archivados en results/"
 
@@ -22,8 +23,8 @@ test-api: setup
 	docker run -d --network calc-test-api --env PYTHONPATH=/opt/calc --name apiserver --env FLASK_APP=app/api.py -p 5000:5000 -w /opt/calc calculator-app:latest flask run --host=0.0.0.0
 	sleep 3
 	docker run --network calc-test-api --name api-tests --env PYTHONPATH=/opt/calc --env BASE_URL=http://apiserver:5000/ -w /opt/calc calculator-app:latest pytest --junit-xml=results/api_result.xml -m api || true
-	docker cp api-tests:/opt/calc/results ./results_api 2>/dev/null || mkdir -p results
-	if [ -d results_api ]; then cp -r results_api/* results/ 2>/dev/null || true; rm -rf results_api; fi
+	docker cp api-tests:/opt/calc/results/api_result.xml results/ 2>&1 | grep -v "Error" || true
+	@ls -la results/ 2>/dev/null || echo "Directorio results vacío"
 	docker stop apiserver || true
 	docker rm --force apiserver || true
 	docker stop api-tests || true
@@ -42,16 +43,13 @@ test-e2e: setup
 	docker run -d --network calc-test-e2e --env PYTHONPATH=/opt/calc --name apiserver --env FLASK_APP=app/api.py -p 5000:5000 -w /opt/calc calculator-app:latest flask run --host=0.0.0.0
 	sleep 2
 	docker run -d --network calc-test-e2e --name calc-web -p 80:80 calc-web
-	sleep 2
-	docker create --network calc-test-e2e --name e2e-tests cypress/included:4.9.0 --browser chrome || true
-	docker cp ./test/e2e/cypress.json e2e-tests:/cypress.json
-	docker cp ./test/e2e/cypress e2e-tests:/cypress
-	docker start -a e2e-tests || true
-	docker cp e2e-tests:/results ./results_e2e 2>/dev/null || mkdir -p results
-	if [ -d results_e2e ]; then cp -r results_e2e/* results/ 2>/dev/null || true; rm -rf results_e2e; fi
+	sleep 3
+	docker run --rm --network calc-test-e2e --name e2e-tests -v $(PWD)/test/e2e:/cypress -v $(PWD)/results:/results --shm-size=1gb -e CYPRESS_BASE_URL=http://calc-web cypress/included:4.9.0 --headless --browser chrome --spec "/cypress/cypress/integration/*.spec.js" || true
+	@ls -la results/ 2>/dev/null || echo "Directorio results vacío"
+	docker stop apiserver || true
+	docker stop calc-web || true
 	docker rm --force apiserver || true
 	docker rm --force calc-web || true
-	docker rm --force e2e-tests || true
 	docker network rm calc-test-e2e || true
 	@echo "✓ Pruebas E2E completadas - Resultados archivados en results/"
 

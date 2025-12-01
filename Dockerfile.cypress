@@ -1,0 +1,22 @@
+FROM cypress/included:4.9.0
+
+# Instalar dependencias adicionales para Chrome
+RUN apt-get update && apt-get install -y \
+    libgconf-2-4 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libgdk-pixbuf2.0-0 \
+    libgtk-3-0 \
+    libxss1 \
+    libappindicator1 \
+    libindicator7 \
+    fonts-liberation \
+    xdg-utils \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /cypress
+
+# Chrome necesita estos permisos
+RUN chmod 777 /cypress
+
+ENTRYPOINT []
