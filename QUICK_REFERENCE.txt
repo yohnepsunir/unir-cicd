@@ -1,0 +1,201 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                    PIPELINE CICD - REFERENCIA RÁPIDA                       ║
+║                        Calculadora App - Jenkins                           ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+📍 INICIO RÁPIDO (5 minutos)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Lee primero:
+   → INDEX.md
+
+2. Configura Jenkins:
+   → JENKINS_SETUP.md (15 min)
+
+3. Edita variable email:
+   → Jenkinsfile.cicd.groovy línea ~22
+   NOTIFY_EMAIL = "tu_email@ejemplo.com"
+
+4. Prueba localmente:
+   → ./run-pipeline.sh --full
+
+5. Crea Job en Jenkins:
+   → Type: Pipeline
+   → Script Path: Jenkinsfile.cicd.groovy
+
+
+🚀 COMANDOS PRINCIPALES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Ejecución completa (con todo)
+./run-pipeline.sh --full
+
+# Solo build
+./run-pipeline.sh --build
+
+# Solo pruebas
+./run-pipeline.sh --tests
+
+# Solo deploy
+./run-pipeline.sh --deploy
+
+# Limpiar todo
+./run-pipeline.sh --clean
+
+# Ayuda
+./run-pipeline.sh --help
+
+
+📊 ETAPAS DEL PIPELINE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Checkout          → Descarga repositorio Git
+2. Build             → Construye imágenes Docker
+3. Unit Tests        → pytest + cobertura (unit_result.xml)
+4. API Tests         → pytest REST (api_result.xml)
+5. E2E Tests         → Cypress (e2e_result.xml)
+6. Start App         → Deploy en Staging
+7. Health Check      → Verifica API disponible
+
+Tiempo total: ~10-15 minutos
+
+
+📧 NOTIFICACIONES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ SUCCESS      → NO se envía email
+⚠️  UNSTABLE    → Email de advertencia
+❌ FAILURE      → Email detallado (SOLO este)
+
+Incluye en email:
+  • Nombre del trabajo (JOB_NAME)
+  • Número de ejecución (BUILD_NUMBER)
+  • Rama (GIT_BRANCH)
+  • Commit (GIT_COMMIT)
+  • Enlaces a Build y Logs
+
+
+📁 ARCHIVOS GENERADOS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+results/
+├── unit_result.xml       → JUnit pruebas unitarias
+├── api_result.xml        → JUnit pruebas API
+├── e2e_result.xml        → JUnit pruebas E2E
+├── coverage.xml          → Cobertura XML
+└── coverage/             → Reporte HTML (abre index.html)
+
+
+🔧 CONFIGURACIÓN JENKINS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Plugin requerido:
+  ✓ Email Extension Plugin
+
+SMTP (Manage Jenkins → System):
+  - SMTP Server: mail.example.com
+  - SMTP Port: 587
+  - Use TLS: ✓
+  - From: jenkins@example.com
+
+Agente:
+  - Label: docker
+  - Docker: instalado
+
+Variable a personalizar:
+  Jenkinsfile.cicd.groovy línea ~22:
+  NOTIFY_EMAIL = "tu_email@ejemplo.com"
+
+
+🛠️ TARGETS MAKEFILE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+make build              # Construir imágenes
+make test-unit         # Pruebas unitarias
+make test-api          # Pruebas API
+make test-e2e          # Pruebas E2E
+make deploy-stage      # Deploy en staging
+make clean-docker      # Limpiar Docker
+make clean-results     # Limpiar resultados
+make clean             # Limpiar todo
+
+
+⚙️ VARIABLES IMPORTANTES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+NOTIFY_EMAIL          → Email para notificaciones
+SMTP_SERVER           → Servidor de correo
+SMTP_PORT             → Puerto SMTP (587)
+RESULTS_DIR           → Directorio de resultados
+API_PORT              → Puerto de API (5000)
+WEB_PORT              → Puerto web (80)
+
+
+📖 DOCUMENTACIÓN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+INDEX.md                    → Índice de documentación
+CHANGES_SUMMARY.md          → Resumen ejecutivo
+PIPELINE_SUMMARY.md         → Descripción completa
+JENKINS_SETUP.md            → Guía de configuración
+JENKINS_CONFIG.md           → Variables y credenciales
+EXAMPLES.md                 → Ejemplos prácticos
+JENKINS_PIPELINE_CONFIG.sh  → Variables configurables
+
+
+❓ TROUBLESHOOTING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Email no se envía:
+  1. Verifica SMTP: Manage Jenkins → System
+  2. Ve logs: Manage Jenkins → System Log
+  3. Busca: "EmailExtension" o "SMTP"
+
+Pruebas fallan:
+  1. Ejecuta localmente: ./run-pipeline.sh --tests
+  2. Ve logs contenedor: docker logs unit-tests
+  3. Verifica puerto: curl http://localhost:5000/
+
+Docker network error:
+  make clean-docker
+  o: docker network prune
+
+
+✅ CHECKLIST PRE-PRODUCCIÓN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[ ] Instalar Email Extension Plugin
+[ ] Configurar SMTP en Jenkins
+[ ] Agente Docker disponible (label: docker)
+[ ] NOTIFY_EMAIL actualizado
+[ ] Pruebas locales exitosas: ./run-pipeline.sh --full
+[ ] Build manual en Jenkins
+[ ] Email de prueba recibido
+[ ] Reportes accesibles en Jenkins
+
+
+📞 SOPORTE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Consulta documentación: INDEX.md
+2. Ejecuta localmente: ./run-pipeline.sh --full
+3. Revisa logs Jenkins: Console Output
+4. Busca en logs sistema: System Log
+
+
+🎯 METAS COMPLETADAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Nuevas etapas: API Tests + E2E Tests
+✅ Archivado: XML de pruebas automático
+✅ Reportes: Cobertura HTML + JUnit
+✅ Notificaciones: Email con Job Name + Build #
+✅ Pipeline: Docker + Git + Deploy automático
+✅ Documentación: Completa y detallada
+
+
+═══════════════════════════════════════════════════════════════════════════════
+Última actualización: 1 de Diciembre de 2025
+Versión: 1.0
+Estado: ✅ Listo para Producción
+═══════════════════════════════════════════════════════════════════════════════
