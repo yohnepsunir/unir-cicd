@@ -78,8 +78,9 @@ pylint:
 deploy-stage:
 	docker stop apiserver || true
 	docker stop calc-web || true
-	docker run -d --rm --name apiserver --network-alias apiserver --env PYTHONPATH=/opt/calc --env FLASK_APP=app/api.py -p 5000:5000 -w /opt/calc calculator-app:latest flask run --host=0.0.0.0
-	docker run -d --rm --name calc-web -p 80:80 calc-web
+	docker network create calc-stage 2>/dev/null || true
+	docker run -d --rm --name apiserver --network calc-stage --network-alias apiserver --env PYTHONPATH=/opt/calc --env FLASK_APP=app/api.py -p 5000:5000 -w /opt/calc calculator-app:latest flask run --host=0.0.0.0
+	docker run -d --rm --name calc-web --network calc-stage --network-alias calc-web -p 80:80 calc-web
 
 # Target para limpiar todos los recursos de Docker
 clean-docker:
@@ -95,6 +96,7 @@ clean-docker:
 	docker network rm calc-test-api || true
 	docker network rm calc-test-e2e || true
 	docker network rm calc-sonar || true
+	docker network rm calc-stage || true
 	@echo "✓ Limpieza completada"
 
 # Target para limpiar resultados
